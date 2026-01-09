@@ -4,35 +4,48 @@ using ManagerConsole.Models;
 
 partial class Program
 {
-    private static bool AddUser(string name, string email)
+    private static bool AddUser(string name, string lastName)
     {
         UserProfile userProfile = new()
         {
             UserName = name,
-            Email = email
+            UserLastName = lastName
         };
         CreateProfileFile(userProfile);
         return true;
     }
 
-    private static IEnumerable<string> GetProfiles()
+    private static ICollection<UserProfile> GetProfiles()
     {
-        
-        return [];
+        var directoryPath = GetDirectiryPath();
+        var directoryInfo = new DirectoryInfo(directoryPath);
+
+        JsonSerializerOptions option = GetSerializerOptions();
+        var usersProfiles = new List<UserProfile>();
+
+        var filesInfo = directoryInfo.GetFiles();
+        foreach (var info in filesInfo)
+        {
+            using FileStream fileStream = info.Open(FileMode.Open);
+            var userProfile = JsonSerializer.Deserialize<UserProfile>(utf8Json: fileStream, option);
+            if (userProfile is not null)
+            {
+                usersProfiles.Add(userProfile);
+            }
+        }
+        return usersProfiles;
     }
 
     private static void CreateProfileFile(UserProfile userProfile)
     {
         var directoryPath = GetDirectiryPath();
         var filePath = Path.Combine(directoryPath, $"{userProfile.Uuid}.json");
-        JsonSerializerOptions option = new JsonSerializerOptions()
-        {
-          PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-          WriteIndented = true  
-        };
-        string jsonUser = JsonSerializer.Serialize<UserProfile>(userProfile, option);
-        File.WriteAllText(filePath, jsonUser);
+        JsonSerializerOptions option = GetSerializerOptions();
+        using FileStream fileStream = File.Create(filePath);
+        JsonSerializer.Serialize(utf8Json: fileStream, value: userProfile, option);
     }
+
+    
 
     private static string GetDirectiryPath()
     {
