@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "eRcXyBQMR4I=",
+  "dgSpecHash": "5bJ/ygZ9sLM=",
   "success": true,
   "projectFilePath": "D:\\NET\\ManagerUserProfiles\\ManagerConsole\\ManagerConsole.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\nikit\\.nuget\\packages\\spectre.console\\0.54.0\\spectre.console.0.54.0.nupkg.sha512"
+  ],
   "logs": []
 }
