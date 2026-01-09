@@ -1,14 +1,14 @@
-﻿using System.Reflection;
-using ManagerConsole.Models;
+﻿using ManagerConsole.Enum;
 using Spectre.Console;
 
 while(true)
 {
+    AnsiConsole.Clear();
     AnsiConsole.MarkupLine("[green]Welcome to the HR Dashboard![/]");
     AnsiConsole.WriteLine();
     var choice = AnsiConsole.Prompt(new SelectionPrompt<string>()
         .Title("Select action!")
-        .AddChoices("Add User","Get profles", "Exit"));
+        .AddChoices("Add User","Edit profles", "Exit"));
     if (choice == "Add User")
     {
         string userName = AnsiConsole.Ask<string>("Enter your name: ");
@@ -16,31 +16,38 @@ while(true)
 
         AddUser(userName, userLastName);
     }
-    else if (choice == "Get profles")
+    else if (choice == "Edit profles")
     {
         var profiles = GetProfiles();  
         if (profiles.Count > 0)
         {
-            var table = new Table();
-            var typeUserProfile = typeof(UserProfile);
-            var userProfileFields = typeUserProfile.GetProperties();
-
-            foreach (var propetry in userProfileFields)
+            DrawUserProfileTable(profiles);
+            var selectedUser = SelectUserProfile(profiles);
+            if (selectedUser is null)
             {
-                table.AddColumn(propetry.Name);
+                continue;
             }
-
-            foreach (var profile in profiles)
+            AnsiConsole.Clear();
+            var choiceForEdit = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title("Select the field you want to edit")
+                .AddChoices("User name","Last user name", "User email", "Exit"));
+            if (choiceForEdit == "User name")
             {
-                table.AddRow(
-                    profile.Uuid.ToString(),
-                    profile.UserName,
-                    profile.UserLastName,
-                    profile.Email,
-                    profile.RegisterDate.ToString()
-                );
+                EditUserProfile(selectedUser, EditingProperty.UserName);
             }
-            AnsiConsole.Write(table);
+            else if (choiceForEdit == "Last user name")
+            {
+                EditUserProfile(selectedUser, EditingProperty.UserLastName);
+            }
+            else if(choiceForEdit == "User email")
+            {
+                EditUserProfile(selectedUser, EditingProperty.UserEmail);
+            }
+            else if (choiceForEdit == "Exit")
+            {
+                continue;
+            }
+            AnsiConsole.MarkupLine("[green]User profile successfully updated![/]");
             AnsiConsole.Console.Input.ReadKey(true);
         } 
         else
@@ -54,6 +61,5 @@ while(true)
     {
         break;
     }
-    AnsiConsole.Clear();
 }
 
